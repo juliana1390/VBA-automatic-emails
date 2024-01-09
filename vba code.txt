@@ -1,0 +1,76 @@
+Option Explicit
+
+Sub Email()
+    
+    Dim sSendTo As String
+    Dim sName As String
+    Dim vTempName As Variant
+    Dim iFirstRow As Long
+    Dim iLastRow As Long
+    Dim ws As Worksheet
+    Dim i As Long
+        
+    Set ws = ThisWorkbook.Sheets("Plan1")
+    
+    iFirstRow = 2                                                     'Informa a linha que começa a lista de emails
+    iLastRow = ws.Range("A1").SpecialCells(xlCellTypeLastCell).Row    'Recupera automaticamente a última linha da tabela
+    
+    'Percorre a listagem de emails para enviar
+    For i = iFirstRow To iLastRow
+        
+        Application.StatusBar = "Enviando email..." & (i - iFirstRow + 1)
+        
+        sSendTo = Trim(ws.Range("A" & i))
+        sName = Trim(ws.Range("B" & i))
+            
+        Send_Emails sSendTo, sName, iFirstRow, iLastRow, i
+    
+    Next i
+    
+    Application.StatusBar = False
+    MsgBox "Emails enviados", vbInformation
+
+End Sub
+
+Sub Send_Emails(sSendTo As String, sName As String, iFirstRow As Long, iLastRow As Long, i As Long)
+    Dim OutlookApp As Object
+    Dim OutlookMail As Object
+    Dim sStatus As String
+
+    On Error GoTo Error_Sub
+    
+    Set OutlookApp = CreateObject("Outlook.Application")
+    Set OutlookMail = OutlookApp.CreateItem(0)
+    
+       With OutlookMail
+       
+        If Len(sSendTo) = 0 Or Len(sName) = 0 Then   'Verifica se o email e/ou nome do destinatário foi informado
+            sStatus = "FALHA NO ENVIO!"
+            ThisWorkbook.Sheets("Plan1").Range("C" & i) = sStatus
+            Exit Sub
+        End If
+
+           .To = sSendTo
+           .CC = ""
+           .BCC = ""
+           .Subject = "e-mail teste"
+           .Body = "Olá, " & sName & Chr(10) & Chr(10) _
+                & "Este e-mail é um teste para automatizar os envios de e-mails da produção." & Chr(10) & Chr(10) _
+                & "Juliana - estagiária"
+           .Attachments.Add ThisWorkbook.Path & "\" & sName & ".docx"   'Anexa arquivos ao email
+           .Send 'usar .Display no lugar de .Send para exibir a mensagem ao invés de enviar caso queira testar
+           sStatus = "Email enviado!"
+       End With
+    
+     ThisWorkbook.Sheets("Plan1").Range("C" & i) = sStatus
+    
+    Set OutlookMail = Nothing
+    Set OutlookApp = Nothing
+    
+Exit Sub
+Error_Sub:
+    sStatus = "FALHA NO ENVIO!"
+    ThisWorkbook.Sheets("Plan1").Range("C" & i) = sStatus
+    MsgBox Err.Description, vbExclamation
+    Exit Sub
+End Sub
