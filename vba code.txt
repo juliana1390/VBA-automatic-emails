@@ -54,9 +54,13 @@ Sub Send_Emails(sSendTo As String, sName As String, iFirstRow As Long, iLastRow 
            .CC = ""
            .BCC = ""
            .Subject = "e-mail teste"
-           .Body = "Olá, " & sName & Chr(10) & Chr(10) _
-                & "Este e-mail é um teste para automatizar os envios de e-mails da produção." & Chr(10) & Chr(10) _
-                & "Juliana - estagiária"
+           .BodyFormat = olFormatHTML
+           .HTMLBody = "<p>Olá, " & sName & "!" & "</p>" _
+                & "<p>Isto é um <b>teste</b>, para o envio de e-mails <span style=""color:#CC0000""><b>automáticos</b></span>.</p>" _
+                & "<p>Com anexo <span style=""color:#3333FF""><b>específico</b></span> para cada e-mail.</p>" _
+                & "<p><u>Teste_teste.</u></p>" _
+                & "<p>Atenciosamente,</p>" _
+                & "<p>Juliana</p>"
            .Attachments.Add ThisWorkbook.Path & "\" & sName & ".docx"   'Anexa arquivos ao email
            .Send 'usar .Display no lugar de .Send para exibir a mensagem ao invés de enviar caso queira testar
            sStatus = "Email enviado!"
